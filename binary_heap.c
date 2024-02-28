@@ -1,4 +1,6 @@
 /*
+    Implementation of Min Binary Heap
+
     “parent(i)=(i-1)/2” for the parent node.
     “left_child(i)=2*i+1” for the left child.
     “right_child(i)=2*i+2” for the right child.
@@ -6,6 +8,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#define MIN_MAX -9999
+#define DEBUG 1
+
+#if DEBUG
+#define DEBUG_PRINT(fmt, ...) printf(fmt, __VA_ARGS__)
+#else
+#define DEBUG_PRINT(fmt, ...)
+#endif
 
 typedef struct min_heap {
     int* array;
@@ -17,7 +28,9 @@ void swap(int* a, int* b);
 heap_t* create_heap(int capacity);
 void insert(heap_t* heap, int data);
 void _insert_helper(heap_t* heap, int index);
+void _resize_heap(heap_t* heap);
 void heapify_min(heap_t* heap, int index);
+int peek(heap_t* heap);
 int extract_min(heap_t* heap);
 void print_heap(heap_t* heap);
 void destroy_heap(heap_t* heap);
@@ -55,10 +68,15 @@ void _insert_helper(heap_t* heap, int index) {
     }
 }
 
+void _resize_heap(heap_t* heap) {
+    heap->capacity *= 2;
+    heap->array = (int*)realloc(heap->array, heap->capacity * sizeof(int));
+}
+
 void insert(heap_t* heap, int data) {
-    if (heap->size > heap->capacity) {
-        printf("ERROR");
-        return;
+    if (heap->size == heap->capacity) {
+        _resize_heap(heap);
+        DEBUG_PRINT("Resize heap->capacity to: %d\n", heap->capacity);
     }
     heap->array[heap->size] = data;
     _insert_helper(heap, heap->size);
@@ -89,10 +107,17 @@ void heapify_min(heap_t* heap, int index) {
     }
 }
 
+int peak(heap_t* heap) {
+    if (heap->size <= 0) {
+        return MIN_MAX;
+    }
+    return heap->array[0];
+}
+
 int extract_min(heap_t* heap) {
     int delete;
     if (heap->size == 0)
-        return -999;
+        return MIN_MAX;
 
     delete = heap->array[0];
     // replace with last node
@@ -115,7 +140,7 @@ void destroy_heap(heap_t* heap) {
 }
 
 int main() {
-    heap_t* heap = create_heap(10);
+    heap_t* heap = create_heap(3);
     insert(heap, 10);
     insert(heap, 2);
     insert(heap, 8);
