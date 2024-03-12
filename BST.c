@@ -15,6 +15,15 @@ typedef struct treenode {
     struct treenode* left, *right;
 }treenode_t;
 
+typedef struct queuenode {
+    treenode_t* treenode;
+    struct queuenode* next;
+}queuenode_t;
+
+typedef struct queue {
+    queuenode_t* front, *rear;
+}queue_t;
+
 treenode_t* create_node(int value);
 treenode_t* search_node(treenode_t* root, int target);
 treenode_t* insert_node(treenode_t* node, int value);
@@ -24,6 +33,70 @@ void post_order_traversal(treenode_t* root);
 treenode_t* find_min(treenode_t* root);
 treenode_t* delete_node(treenode_t* root, int value);
 void delete_tree(treenode_t* root);
+
+/**
+ * Queue Implementation
+*/
+queue_t* create_queue() {
+    queue_t* q = (queue_t*)malloc(sizeof(queue_t));
+    if (!q) return NULL;
+    q->front = NULL;
+    q->rear = NULL;
+    return q;
+}
+
+void enqueue(queue_t* q, treenode_t* treenode) {
+    queuenode_t* new_node = (queuenode_t*)malloc(sizeof(queuenode_t));
+    if (!new_node) return;
+    new_node->treenode = treenode;
+    new_node->next = NULL;
+    if (q->rear == NULL) {
+        q->front = new_node;
+        q->rear = new_node;
+    } else {
+    q->rear->next = new_node;
+    q->rear = new_node;
+    }
+}
+
+treenode_t* dequeue(queue_t* q) {
+    if (!q) return NULL;
+    if (q->front == NULL) return NULL;
+    queuenode_t* temp = q->front;
+    treenode_t* result = temp->treenode;
+    q->front = q->front->next;
+    if (q->front == NULL) q->rear = NULL;
+    free(temp);
+    return result;
+}
+
+int is_queue_empty(queue_t* q) {
+    return q->front == NULL;
+}
+
+void delete_queue(queue_t* q) {
+    while (!is_queue_empty(q)) {
+        dequeue(q);
+    }
+    free(q);
+}
+
+void BFS_level_order_traversal(treenode_t* root) {
+    if (!root) return;
+    queue_t* q = create_queue();
+    enqueue(q, root);
+    while (!is_queue_empty(q)) {
+        treenode_t* current_node = dequeue(q);
+        printf("%d ", current_node->value);
+
+        // left to right
+        if (current_node->left)
+            enqueue(q, current_node->left);
+        if (current_node->right)
+            enqueue(q, current_node->right);
+    }
+    delete_queue(q);
+}
 
 treenode_t* create_node(int value) {
     treenode_t* new_node = (treenode_t*)malloc(sizeof(treenode_t));
@@ -152,6 +225,9 @@ int main() {
 
     delete_node(root, 30);
     in_order_traversal(root);
+
+    printf("\nBFS: ");
+    BFS_level_order_traversal(root);
 
     delete_tree(root);
     return 0;
