@@ -4,3 +4,5 @@ stack_array
 .vscode/
 queue
 tempCodeRunnerFile.c
+threads
+locks
